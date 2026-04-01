@@ -1,0 +1,39 @@
+# PYTHON
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environments
+venv/
+env/
+
+# Spark / Logs
+*.log
+metastore_db/
+spark-warehouse/
+
+# Kafka logs
+kafka-logs/
+zookeeper/
+
+# Data files (VERY IMPORTANT: DO NOT COMMIT DATA FILES)
+data/
+*.parquet
+*.csv
+*.json
+
+# Checkpoints (Spark Streaming)
+checkpoints/
+
+# OS Files
+.DS_Store
+
+# VSCODE
+.vscode/
+
+# Environment variables
+.env
+
+# DuckDB (we will use later)
+*.duckdb
+*.db
