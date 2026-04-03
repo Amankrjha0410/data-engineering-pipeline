@@ -1,21 +1,20 @@
 STEPS TO FOLLOW TO RUN CODE
 
-# Step 1: Zookeeper
-bin/zookeeper-server-start.sh config/zookeeper.properties
+# Step 1: Start Kafka Server
+kafka-server-start /opt/homebrew/etc/kafka/server.properties
 
-# Step 2: Kafka Broker
-bin/kafka-server-start.sh config/server.properties
-
-# Step 3: Create Topic
-bin/kafka-topics.sh \
---create \
+# Step 2: Create Topic
+kafka-topics --create \
 --topic orders \
 --bootstrap-server localhost:9092
+
+# Step 3: Verify Kafka Server
+kafka-topics --list --bootstrap-server localhost:9092
 
 # Step 4: Run Producer
 python producer/orders_producer.py
 
 # Step 5: Run Spark Command
 spark-submit \
---packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 \
+--packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.1 \
 spark_jobs/streaming_job.py

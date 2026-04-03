@@ -27,7 +27,7 @@ kafka_df = spark.readStream \
 json_df = kafka_df.selectExpr("CAST(value as STRING)")
 
 # PARSE JSON DATA
-parsed_df = json_df.select(from_json(col("value").schema).alias("data")).select("data.*")
+parsed_df = json_df.select(from_json(col("value"),schema).alias("data")).select("data.*")
 
 # DATA CLEANSING & TRANSFORMATIONS
 clean_df = parsed_df \
@@ -37,7 +37,7 @@ clean_df = parsed_df \
 
 # WRITE OUTPUTS TO CONSOLE
 query = clean_df.writeStream \
-    .format("cosole") \
+    .format("console") \
     .outputMode("append") \
     .option("truncate", False) \
     .start()
