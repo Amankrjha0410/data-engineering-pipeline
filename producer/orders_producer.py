@@ -28,9 +28,22 @@ def generate_order():
 
 # MAIN LOOP
 if __name__ == "__main__":
+    # Generate and send orders indefinitely
     print("Starting Kafka Producer....")
     while True:
         order = generate_order()
         producer.send(TOPIC_NAME, value=order)
         print(f"Sent: {order}")
         time.sleep(1)
+
+    # # Generate and send 1000 orders
+    # print("Starting Kafka Producer....")
+    # total_orders = 1000
+    # for _ in range(total_orders):
+    #     order = generate_order()
+    #     producer.send(TOPIC_NAME, value=order)
+    #     print(f"Sent: {order}")
+        
+    # producer.flush()
+    # producer.close()
+    # print(f"Finished sending {total_orders} orders.")

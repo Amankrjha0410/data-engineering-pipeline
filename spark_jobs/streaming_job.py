@@ -2,6 +2,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, to_timestamp, current_timestamp
 from pyspark.sql.types import StructType, IntegerType, StringType
+from pyspark.sql.functions import year, month, dayofmonth
 
 # Create Spark Session
 spark = SparkSession.builder.appName("KafkaSparkStreaming").getOrCreate()
@@ -15,13 +16,22 @@ schema = StructType() \
     .add("amount", IntegerType()) \
     .add("event_time", StringType())
 
-# Read Stream from Kafka
+# Reading Infinitely generated Stream data from Kafka
 kafka_df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "localhost:9092") \
     .option("subscribe", "orders") \
     .option("startingOffsets", "latest") \
     .load()
+
+# # Reading Finite generated Stream data from Kafka
+# kafka_df = spark.read \
+#     .format("kafka") \
+#     .option("kafka.bootstrap.servers", "localhost:9092") \
+#     .option("subscribe", "orders") \
+#     .option("startingOffsets", "earliest") \
+#     .option("endingOffsets", "latest") \
+#     .load()
 
 # Convert value to String
 json_df = kafka_df.selectExpr("CAST(value as STRING)")
@@ -35,11 +45,23 @@ clean_df = parsed_df \
     .withColumn("event_time", to_timestamp(col("event_time"))) \
     .withColumn("processing_time", current_timestamp())
 
-# WRITE OUTPUTS TO CONSOLE
+clean_df = clean_df.withColumn("year", year(col("event_time"))) \
+    .withColumn("month", month(col("event_time"))) \
+    .withColumn("day", dayofmonth(col("event_time")))
+
+# # WRITE STREAM OUTPUTS TO CONSOLE (FINITE STREAM)
+# query = clean_df.coalesce(1).write.mode("overwrite").parquet("batch_output/orders")
+# print("Batch processing completed. Output saved to 'batch_output/orders'.")
+
+# WRITE STREAM OUTPUTS TO CONSOLE (INFINITE STREAM)
 query = clean_df.writeStream \
-    .format("console") \
+    .format("parquet") \
+    .option("path", "stream_output/orders") \
+    .option("checkpointLocation", "checkpoints/orders") \
+    .partitionBy("year", "month", "day") \
     .outputMode("append") \
-    .option("truncate", False) \
+    .trigger(processingTime="30 seconds") \
+    .option("maxOffsetsPerTrigger", 100) \
     .start()
 
 # KEEP STREAM RUNNING
