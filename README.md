@@ -13,6 +13,7 @@ The pipeline simulates real-time order data, streams it through Kafka, processes
 ```
 Kafka Producer → Kafka Topic → PySpark Streaming → Parquet Storage
 ```
+![Pipeline Architecture](assets/pipeline-architecture.png)
 
 * **Producer** generates real-time order data
 * **Kafka** handles streaming ingestion
